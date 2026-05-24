@@ -1,0 +1,46 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{hyperref}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+
+\sloppy
+
+\title{RSA e Assinatura}
+
+\author{...\inst{1}}
+
+\address{
+    Bacharelado em Informática Biomédica\\
+    Universidade Federal do Paraná\\
+    Curitiba - PR - Brasil \\
+    .. de .. de 2026
+}
+
+\usepackage{seqsplit}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,       % Ativa a coloração dos links (em vez de bordas)
+    linkcolor=black,       % Cor dos links internos (figuras, seções)
+    citecolor=black,       % Cor das citações (referências bibliográficas)
+    filecolor=black,       % Cor de links para arquivos
+    urlcolor=black         % Cor de links para sites (URLs)
+}
+
+\renewcommand{\ttdefault}{cmtt}
+
+\begin{document}
+
+\maketitle
+
+\input{text/introduction}
+
+\input{text/main}
+
+\input{text/conclusion}
+
+\bibliographystyle{plain}
+\bibliography{sbc-template}
+
+\end{document}
