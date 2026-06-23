@@ -7,8 +7,8 @@ def getDataSetFilePath():
     dataset_url = "awsaf49/cbis-ddsm-breast-cancer-image-dataset"
     return kagglehub.dataset_download(dataset_url)
 
-def prepareData(dataFilePath):
-    data = pd.read_csv(dataFilePath, usecols=[
+def prepareData(dataset_filepath):
+    data = pd.read_csv(dataset_filepath, usecols=[
         'patient_id',
         'pathology',
         'image file path',
@@ -25,8 +25,8 @@ def getDicomTranslationMap(dataset_filepath):
     for _, row in data.iterrows():
         uid = str(row["SeriesInstanceUID"]).strip()
         desc = str(row["SeriesDescription"]).strip()
-        imagePath = "/".join(str(row["image_path"]).strip().split("/")[1:])
-        cmap[(uid, desc)] = imagePath
+        image_path = "/".join(str(row["image_path"]).strip().split("/")[1:])
+        cmap[(uid, desc)] = image_path
 
     return cmap
 
