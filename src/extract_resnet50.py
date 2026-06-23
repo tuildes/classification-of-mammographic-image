@@ -16,7 +16,6 @@ torch.manual_seed(42)
 np.random.seed(42)
 
 # MARK: - Dataset
-
 class MammographyDataset(Dataset):
     LABEL_MAPPING = {'BENIGN': 0, 'MALIGNANT': 1}
 
@@ -44,15 +43,12 @@ class MammographyDataset(Dataset):
 
 
 # MARK: - Setup
-
 def setupDevice():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Executando o pipeline em: {device}")
     return device
 
-
 # MARK: - Loaders
-
 def loadDataFrame(dataset_filepath, csv_target):
     data = pd.read_csv(os.path.join(dataset_filepath, csv_target))
     data = data[data['pathology'].isin(['BENIGN', 'MALIGNANT'])].reset_index(drop=True)
@@ -70,7 +66,6 @@ def loadDataFrame(dataset_filepath, csv_target):
 
 
 # MARK: - Preparation
-
 def prepareModel(device):
     model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
     model.fc = nn.Identity()
