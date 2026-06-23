@@ -116,7 +116,22 @@ X = np.concatenate(X_features, axis=0)
 y = np.array(y_labels)
 
 # Salva o vetor de caracteristicas para não precisar rodar de novo
-np.save('X_features.npy', X)
-np.save('y_labels.npy', y)
+#np.save('X_features.npy', X)
+#np.save('y_labels.npy', y)
+
+# 1. Transforma a matriz X em um DataFrame do Pandas
+df_features = pd.DataFrame(X)
+
+# 2. Renomeia as colunas (ex: resnet_0, resnet_1, ... resnet_2047) para não confundir depois
+df_features.columns = [f'resnet_{i}' for i in range(X.shape[1])]
+
+# 3. Adiciona a coluna de ID (CRUCIAL para juntar com a radiômica depois)
+df_features['SeriesInstanceUID'] = df_total['SeriesInstanceUID'].values
+
+# 4. Adiciona a coluna do target (0 para Benigno, 1 para Maligno)
+df_features['target_label'] = y
+
+# 5. Salva o arquivo CSV final
+df_features.to_csv('resnet_features_train.csv', index=False)
 
 print(f"\nExtração Concluída! Matriz de Características: {X.shape} (Imagens, Dimensões)")
