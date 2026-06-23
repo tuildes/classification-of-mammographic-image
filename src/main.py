@@ -4,6 +4,9 @@ import numpy as np
 import os
 import kagglehub
 
+# MARK: - Local libraries
+import extract_radiomics as er
+
 # MARK: - SETUP FUNCTIONS
 def dataSetFilePath():
     return kagglehub.dataset_download("awsaf49/cbis-ddsm-breast-cancer-image-dataset")
@@ -66,11 +69,13 @@ def main():
     print(f"DEBUG: Dataset path: {dataset_path}")
     print(f"DEBUG: Train Dataset size: {len(data_train)}")
 
-    for index, row in data_train.iterrows():
-        if (index % 3):
-            imageFilePath = os.path.join(dataset_path, translationImagePath(dicom_translation_map, row["image file path"], "full mammogram images"))
-            maskFilePath = os.path.join(dataset_path, translationImagePath(dicom_translation_map, row["ROI mask file path"], "ROI mask images"))
-            openImageWithMask(imageFilePath, maskFilePath)
+    er.oi()
+
+    # for index, row in data_train.iterrows():
+    #     if (index % 3):
+    #         imageFilePath = os.path.join(dataset_path, translationImagePath(dicom_translation_map, row["image file path"], "full mammogram images"))
+    #         maskFilePath = os.path.join(dataset_path, translationImagePath(dicom_translation_map, row["ROI mask file path"], "ROI mask images"))
+    #         openImageWithMask(imageFilePath, maskFilePath)
 
 if __name__ == "__main__":
     main()
