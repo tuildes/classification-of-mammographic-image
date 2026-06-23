@@ -1,2 +1,38 @@
-def oi():
-    print("Hello world")
+import SimpleITK as sitk
+import radiomics
+from radiomics import featureextractor
+import logging
+
+def setupLoggin():
+    logger = logging.getLogger("radiomics")
+    logger.setLevel(logging.ERROR)
+
+def loadImageAndMask(image_file_path, mask_file_path):
+    image = sitk.ReadImage(image_file_path)
+    mask = sitk.ReadImage(mask_file_path)
+
+    if image.GetSize() != mask.GetSize():
+        resampler = sitk.ResampleImageFilter()
+        resampler.SetReferenceImage(image)
+        resampler.SetInterpolator(sitk.sitkNearestNeighbor)
+        mask = resampler.Execute(mask)
+    else:
+        mask.CopyInformation(image)
+
+    return image, mask
+
+def prepareExtractor():
+    settings = {}
+    settings["binWidth"] = 25
+    settings["interpolator"] = sitk.sitkBSpline
+    settings["resampledPixelSpacing"] = None
+    settings["force2D"] = True
+    settings["normalize"] = True
+    settings["normalizeScale"] = 100
+
+    extractor = featureextractor.RadiomicsFeatureExtractor(**settings)
+
+    return extractor
+
+def calculateFeatures(extractor, image, mask):
+    return extractor.execute(image, mask)

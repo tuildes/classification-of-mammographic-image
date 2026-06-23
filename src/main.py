@@ -4,32 +4,44 @@ import numpy as np
 import os
 
 # MARK: - Local libraries
-import extract_radiomics as er
+import extract_radiomics as exrad
 import dataset as ds
-
-# MARK: - SETUP FUNCTIONS
-def openImageWithMask(imageFilePath, maskFilePath):
-    image = cv2.imread(imageFilePath)
-    mask = cv2.imread(maskFilePath)
-
-    h, w = image.shape[:2]
-    mask = cv2.resize(mask, (w, h), interpolation=cv2.INTER_NEAREST)
-
-    row = np.concatenate((image, mask), axis=1)
-
-    cv2.imshow('sei la', row)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 # MARK: - MAIN PROGRAM
 def main():
+    results_folder = "./results"
+    radiomics_train_csv = "radiomics_train.csv"
+    resnet_train_csv = "resnet_train_csv"
+
     dataset_filepath = ds.getDataSetFilePath()
     data_train = ds.getPreparedDataSet(dataset_filepath, "csv/mass_case_description_train_set.csv")
 
+    # DEBUG Info
+    print(data_train['pathology'].value_counts())
+
+    # MARK: - ResNet50 analyzes
+
+    # MARK: - Pyradiomics analyzes
+    exrad.setupLoggin()
+    pyrad_extractor = exrad.prepareExtractor()
+    pyrad_features = []
     for index, row in data_train.iterrows():
-        if (index % 3):
-            print(row["pathology"])
-            # openImageWithMask(row["image file path"], row["ROI mask file path"])
+        image, mask = exrad.loadImageAndMask(row["image file path"], row["ROI mask file path"])
+        features = exrad.calculateFeatures(pyrad_extractor, image, mask)
+        features['patient_id'] = row['patient_id']
+        pyrad_features.append(features)
+        print(f"PYRADIOMICS: Extracted {len(features)} Features - {(index + 1)}/{len(data_train)}")
+
+    dataframe_pyrad_features = pd.DataFrame(pyrad_features)
+    if not os.path.isdir(results_folder):
+        os.mkdir(results_folder)
+    dataframe_pyrad_features.to_csv(os.path.join(results_folder, radiomics_train_csv), index=False)
+
+    # MARK: - Read all csv (features) and merge
+
+
+    # MARK: - SVM
+    # MARK: - Random Forest
 
 if __name__ == "__main__":
     main()

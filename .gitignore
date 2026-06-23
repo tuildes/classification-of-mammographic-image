@@ -1,4 +1,5 @@
 .DS_Store
+.venv
 
 # Ignore huge files
 archive.zip
