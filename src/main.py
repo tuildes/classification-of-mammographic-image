@@ -12,17 +12,8 @@ from sklearn.preprocessing import StandardScaler
 import extract_radiomics as exrad
 import extract_resnet50 as exres
 import dataset as ds
-import classify as cls
-
-def print_results(y_test, y_pred, featurer_classifier):
-    print(f"\n--- RELATÓRIO DE CLASSIFICAÇÃO {featurer_classifier} OTIMIZADO ---")
-    print(classification_report(y_test, y_pred, target_names=['Benigno', 'Maligno']))
-    print(f"Nova Acurácia Global Atingida: {accuracy_score(y_test, y_pred)*100:.2f}%")
-    print("Matriz de Confusão:")
-    print(confusion_matrix(y_test, y_pred))
 
 # MARK: - MAIN PROGRAM
-
 def main():
     results_folder = "./results"
     radiomics_train_csv = os.path.join(results_folder, "radiomics_features_train.csv")
