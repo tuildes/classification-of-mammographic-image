@@ -14,8 +14,6 @@ np.random.seed(42)
 
 # MARK: - Dataset
 class MammographyDataset(Dataset):
-    LABEL_MAPPING = {'BENIGN': 0, 'MALIGNANT': 1}
-
     def __init__(self, dataframe, transform=None):
         self.df = dataframe
         self.transform = transform
@@ -31,7 +29,7 @@ class MammographyDataset(Dataset):
             img = np.ones((224, 224), dtype=np.uint8) * 128
 
         img_pil = Image.fromarray(img).convert('RGB')
-        label = self.LABEL_MAPPING[row['pathology']]
+        label = self.row['target_label']
 
         if self.transform:
             img_pil = self.transform(img_pil)

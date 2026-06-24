@@ -25,7 +25,7 @@ def main():
     radiomics_train_csv = os.path.join(results_folder, "radiomics_features_train.csv")
     resnet_train_csv = os.path.join(results_folder, "resnet_features_train.csv")
     merged_train_csv = os.path.join(results_folder, "merged_features_train.csv")
-    csv_target = "csv/mass_case_description_train_set.csv"
+    csv_target = "csv/mass_case_description_train_set_small.csv"
 
     dataset_filepath = ds.getDataSetFilePath()
     data_train = ds.getPreparedDataSet(dataset_filepath, "csv/mass_case_description_train_set.csv")
@@ -63,11 +63,11 @@ def main():
         pyrad_features = []
 
         for index, row in data_train.iterrows():
-            image, mask = exrad.loadImageAndMask(row["image file path"], row["ROI mask file path"])
+            image, mask = exrad.loadImageAndMask(row["image file path"],
+                                                 row["ROI mask file path"])
             features = exrad.calculateFeatures(pyrad_extractor, image, mask)
             features['pseudo_index'] = row['pseudo_index']
-            features['pathology'] = row['pathology']
-            # features['target_label'] = 1 if row['pathology'] else 0
+            features['target_label'] = row['target_label']
             pyrad_features.append(features)
             print(f"PYRADIOMICS: Extracted {len(features)} Features - {(index + 1)}/{len(data_train)}")
 
@@ -83,9 +83,9 @@ def main():
     # MARK: - Read all csv (features) and merge
     dataset_train_radiom = pd.read_csv(radiomics_train_csv)
     dataset_train_resnet = pd.read_csv(resnet_train_csv)
-
-    # Verificar esse merge (pode desalinhar)
-    dataset_train_merged = pd.merge(dataset_train_radiom, dataset_train_resnet, on='pseudo_index')
+    dataset_train_merged = pd.merge(dataset_train_radiom,
+                                    dataset_train_resnet,
+                                    on='pseudo_index')
     dataset_train_merged.to_csv(merged_train_csv, index=False)
 
     # MARK: - SVM
@@ -98,10 +98,10 @@ def main():
     y_test_resnet_rand, y_pred_resnet_rand = cls.classify(resnet_train_csv, classifier)
     y_test_radiomics_rand, y_pred_radiomics_rand = cls.classify(radiomics_train_csv, classifier)
 
-		# MARK: - Print Results
-    print_results(y_test_resnet_svm, y_pred_resnet_svm, "RESNET SVM")
-    print_results(y_test_radiomics_svm, y_pred_radiomics_svm, "RADIOMICS SVM")
-    print_results(y_test_resnet_rand, y_pred_resnet_rand, "RESNET RANDOM FOREST")
+    # MARK: - Print Results
+    print_results(y_test_resnet_svm,     y_pred_resnet_svm,     "RESNET SVM")
+    print_results(y_test_radiomics_svm,  y_pred_radiomics_svm,  "RADIOMICS SVM")
+    print_results(y_test_resnet_rand,    y_pred_resnet_rand,    "RESNET RANDOM FOREST")
     print_results(y_test_radiomics_rand, y_pred_radiomics_rand, "RADIOMICS RANDOM FOREST")
 
 if __name__ == "__main__":

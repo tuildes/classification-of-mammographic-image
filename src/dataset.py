@@ -49,17 +49,28 @@ def getPreparedDataSet(dataset_filepath, target):
     data = prepareData(mcd_filepath)
 
     # Fix the "image filepaths" in dataset to local jpegs
-    data['image file path'] = data["image file path"].apply(lambda x: translationImagePath(
-        dataset_filepath, dicom_translation_map, x, "full mammogram images"
+    data['image file path'] = data["image file path"].apply(
+        lambda x: translationImagePath(dataset_filepath,
+                                       dicom_translation_map,
+                                       x,
+                                       "full mammogram images"
     ))
-    data['ROI mask file path'] = data["ROI mask file path"].apply(lambda x: translationImagePath(
-        dataset_filepath, dicom_translation_map, x, "ROI mask images"
+    data['ROI mask file path'] = data["ROI mask file path"].apply(
+        lambda x: translationImagePath(dataset_filepath,
+                                       dicom_translation_map,
+                                       x,
+                                       "ROI mask images"
     ))
-    data['cropped image file path'] = data["cropped image file path"].apply(lambda x: translationImagePath(
-        dataset_filepath, dicom_translation_map, x, "cropped images"
+    data['cropped image file path'] = data["cropped image file path"].apply(
+        lambda x: translationImagePath(dataset_filepath,
+                                       dicom_translation_map,
+                                       x,
+                                       "cropped images"
     ))
 
-    # Make the pathology to binary (malign is true)
-    data["pathology"] = data["pathology"].apply(lambda x: 'MALIGNANT' if x == 'MALIGNANT' else 'BENIGN')
+    # Make the pathology to binary (malignant is true)
+    data["target_label"] = data["pathology"].apply(
+        lambda x: 1 if x == 'MALIGNANT' else 0
+    )
 
     return data
