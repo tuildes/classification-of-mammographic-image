@@ -2,3 +2,5 @@ pandas
 numpy
 opencv-python
 kagglehub
+torch
+torchvision
