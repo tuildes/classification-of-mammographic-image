@@ -10,10 +10,18 @@ def getDataSetFilePath():
 def prepareData(dataset_filepath):
     data = pd.read_csv(dataset_filepath, usecols=[
         'patient_id',
+        'left or right breast',
+        'image view',
+        'abnormality id',
         'pathology',
         'image file path',
-        'ROI mask file path'
+        'ROI mask file path',
+        'cropped image file path'
     ])
+    data['pseudo_index'] = data['patient_id'] + '_' + \
+                           data['left or right breast'] + '_' + \
+                           data['image view'] + '_' + \
+                           data['abnormality id'].astype(str)
     return data
 
 def getDicomTranslationMap(dataset_filepath):
@@ -47,8 +55,11 @@ def getPreparedDataSet(dataset_filepath, target):
     data['ROI mask file path'] = data["ROI mask file path"].apply(lambda x: translationImagePath(
         dataset_filepath, dicom_translation_map, x, "ROI mask images"
     ))
+    data['cropped image file path'] = data["cropped image file path"].apply(lambda x: translationImagePath(
+        dataset_filepath, dicom_translation_map, x, "cropped images"
+    ))
 
     # Make the pathology to binary (malign is true)
-    data["pathology"] = data["pathology"].apply(lambda x: x == 'MALIGNANT')
+    data["pathology"] = data["pathology"].apply(lambda x: 'MALIGNANT' if x == 'MALIGNANT' else 'BENIGN')
 
     return data
