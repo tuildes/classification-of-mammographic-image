@@ -1,0 +1,15 @@
+Results of testing: merged with model: SVM
+Acurácia:       0.6825
+F1-Score:       0.6078
+Sensibilidade:  0.6327
+Especificidade: 0.7143
+
+RELATÓRIO COMPLETO (SCIKIT-LEARN):
+              precision    recall  f1-score   support
+
+      BENIGN       0.75      0.71      0.73       231
+   MALIGNANT       0.58      0.63      0.61       147
+
+    accuracy                           0.68       378
+   macro avg       0.67      0.67      0.67       378
+weighted avg       0.69      0.68      0.68       378

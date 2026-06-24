@@ -32,8 +32,8 @@ def main():
     resnet_test_csv = os.path.join(results_folder, "resnet_features_test.csv")
     merged_test_csv = os.path.join(results_folder, "merged_features_test.csv")
 
-    csv_target = "csv/mass_case_description_train_set_small.csv"
-    csv_test_target = "csv/mass_case_description_test_set_small.csv"
+    csv_target = "csv/mass_case_description_train_set.csv"
+    csv_test_target = "csv/mass_case_description_test_set.csv"
 
     dataset_filepath = ds.getDataSetFilePath()
     data_train = ds.getPreparedDataSet(dataset_filepath, csv_target)
