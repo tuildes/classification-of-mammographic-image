@@ -3,7 +3,7 @@ import os
 import gc
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
 # MARK: - Local libraries
 import extract_radiomics as exrad
@@ -15,7 +15,8 @@ def print_results(y_test, y_pred, featurer_classifier):
     print(f"\n--- RELATÓRIO DE CLASSIFICAÇÃO {featurer_classifier} OTIMIZADO ---")
     print(classification_report(y_test, y_pred, target_names=['Benigno', 'Maligno']))
     print(f"Nova Acurácia Global Atingida: {accuracy_score(y_test, y_pred)*100:.2f}%")	
-    
+    print("Matriz de Confusão:")
+    print(confusion_matrix(y_test, y_pred))    
 
 # MARK: - MAIN PROGRAM
 
