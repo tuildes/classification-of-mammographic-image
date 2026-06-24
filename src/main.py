@@ -1,16 +1,18 @@
 import pandas as pd
 import os
 import gc
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 
 # MARK: - Local libraries
 import extract_radiomics as exrad
 import extract_resnet50 as exres
 import dataset as ds
-import svm_classifier as svm
+import classify as cls
 
-def print_results(y_test, y_pred, classifier):
-    print("\n--- RELATÓRIO DE CLASSIFICAÇÃO {classifier} OTIMIZADO (SVM RBF) ---")
+def print_results(y_test, y_pred, featurer_classifier):
+    print(f"\n--- RELATÓRIO DE CLASSIFICAÇÃO {featurer_classifier} OTIMIZADO ---")
     print(classification_report(y_test, y_pred, target_names=['Benigno', 'Maligno']))
     print(f"Nova Acurácia Global Atingida: {accuracy_score(y_test, y_pred)*100:.2f}%")	
     
@@ -78,15 +80,20 @@ def main():
     # MARK: - Read all csv (features) and merge
 
     # MARK: - SVM
-    y_test_resnet, y_pred_resnet = svm.svm_classifier(resnet_train_csv)
-    y_test_radiomics, y_pred_radiomics = svm.svm_classifier(radiomics_train_csv)
+    classifier = SVC(kernel='rbf', C=2.0, gamma='scale', random_state=42)
+    y_test_resnet_svm, y_pred_resnet_svm = cls.classify(resnet_train_csv, classifier)
+    y_test_radiomics_svm, y_pred_radiomics_svm = cls.classify(radiomics_train_csv, classifier)
     
-    # MARK: - Print Results
-    print_results(y_test_resnet, y_pred_resnet, "RESNET")
-    print_results(y_test_radiomics, y_pred_radiomics, "RADIOMICS")  
-         
     # MARK: - Random Forest
-
+    classifier = RandomForestClassifier(n_estimators=100)
+    y_test_resnet_rand, y_pred_resnet_rand = cls.classify(resnet_train_csv, classifier)
+    y_test_radiomics_rand, y_pred_radiomics_rand = cls.classify(radiomics_train_csv, classifier)
+		
+		# MARK: - Print Results
+    print_results(y_test_resnet_svm, y_pred_resnet_svm, "RESNET SVM")
+    print_results(y_test_radiomics_svm, y_pred_radiomics_svm, "RADIOMICS SVM")  
+    print_results(y_test_resnet_rand, y_pred_resnet_rand, "RESNET RANDOM FOREST")
+    print_results(y_test_radiomics_rand, y_pred_radiomics_rand, "RADIOMICS RANDOM FOREST") 
 
 if __name__ == "__main__":
     main()

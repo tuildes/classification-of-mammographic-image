@@ -1,15 +1,18 @@
-from sklearn.svm import SVC
+import pandas as pd
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-import pandas as pd
-import os
 
-def svm_classifier(csv_path):
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+
+def classify(csv_path, classifier):
 	# Extrai as features e labels do csv
 	df = pd.read_csv(csv_path)
 	y = df['target_label']
 	X = df.drop(columns=['target_label', 'SeriesInstanceUID', 'patient_id'], errors='ignore')
 	
+	# Garante que só tenham numeros nas features
 	X = X.select_dtypes(include=['number'])
 	
 	# Separa os dados em dados de treino e de teste
@@ -20,8 +23,6 @@ def svm_classifier(csv_path):
 	X_train_std = scaler.fit_transform(X_train)
 	X_test_std = scaler.transform(X_test)
 	
-	# Configura o modelo
-	classifier = SVC(kernel='rbf', C=2.0, gamma='scale', random_state=42)
 	classifier.fit(X_train_std, y_train)
 	
 	# Classifica em benigno e maligno
