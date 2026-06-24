@@ -35,4 +35,10 @@ def prepareExtractor():
     return extractor
 
 def calculateFeatures(extractor, image, mask):
-    return extractor.execute(image, mask)
+    f = extractor.execute(image, mask)
+    cf = {
+        key: float(value)
+        for key, value in f.items()
+        if not key.startswith('diagnostics_')
+    }
+    return cf

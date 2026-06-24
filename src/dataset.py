@@ -46,6 +46,8 @@ def getPreparedDataSet(dataset_filepath, target):
     mcd_filepath = os.path.join(dataset_filepath, target)
     dicom_translation_map = getDicomTranslationMap(dataset_filepath)
 
+    print(mcd_filepath)
+
     data = prepareData(mcd_filepath)
 
     # Fix the "image filepaths" in dataset to local jpegs

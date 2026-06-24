@@ -29,7 +29,7 @@ class MammographyDataset(Dataset):
             img = np.ones((224, 224), dtype=np.uint8) * 128
 
         img_pil = Image.fromarray(img).convert('RGB')
-        label = self.row['target_label']
+        label = row['target_label']
 
         if self.transform:
             img_pil = self.transform(img_pil)
