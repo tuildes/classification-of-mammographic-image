@@ -1,0 +1,15 @@
+Results of testing: merged with model: random_forest
+Acurácia:       0.6349
+F1-Score:       0.5430
+Sensibilidade:  0.5578
+Especificidade: 0.6840
+
+RELATÓRIO COMPLETO (SCIKIT-LEARN):
+              precision    recall  f1-score   support
+
+      BENIGN       0.71      0.68      0.70       231
+   MALIGNANT       0.53      0.56      0.54       147
+
+    accuracy                           0.63       378
+   macro avg       0.62      0.62      0.62       378
+weighted avg       0.64      0.63      0.64       378

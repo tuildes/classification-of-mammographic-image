@@ -1,0 +1,15 @@
+Results of testing: radiomics with model: SVM
+Acurácia:       0.6190
+F1-Score:       0.4504
+Sensibilidade:  0.4014
+Especificidade: 0.7576
+
+RELATÓRIO COMPLETO (SCIKIT-LEARN):
+              precision    recall  f1-score   support
+
+      BENIGN       0.67      0.76      0.71       231
+   MALIGNANT       0.51      0.40      0.45       147
+
+    accuracy                           0.62       378
+   macro avg       0.59      0.58      0.58       378
+weighted avg       0.61      0.62      0.61       378

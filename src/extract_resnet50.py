@@ -9,6 +9,8 @@ import torch.nn as nn
 from torchvision import models, transforms
 from torch.utils.data import DataLoader, Dataset
 
+import preprocessing as pp
+
 torch.manual_seed(42)
 np.random.seed(42)
 
@@ -27,6 +29,8 @@ class MammographyDataset(Dataset):
         img = cv2.imread(row['cropped image file path'], cv2.IMREAD_GRAYSCALE)
         if img is None:
             img = np.ones((224, 224), dtype=np.uint8) * 128
+
+        img = pp.preprocessing_filter(img)
 
         img_pil = Image.fromarray(img).convert('RGB')
         label = row['target_label']

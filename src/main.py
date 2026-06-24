@@ -16,6 +16,7 @@ import dataset as ds
 # MARK: - MAIN PROGRAM
 def main():
     results_folder = "./results"
+
     radiomics_train_csv = os.path.join(results_folder, "radiomics_features_train.csv")
     resnet_train_csv = os.path.join(results_folder, "resnet_features_train.csv")
     merged_train_csv = os.path.join(results_folder, "merged_features_train.csv")

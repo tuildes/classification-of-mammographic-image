@@ -1,0 +1,15 @@
+Results of testing: radiomics with model: random_forest
+Acurácia:       0.5688
+F1-Score:       0.4360
+Sensibilidade:  0.4286
+Especificidade: 0.6580
+
+RELATÓRIO COMPLETO (SCIKIT-LEARN):
+              precision    recall  f1-score   support
+
+      BENIGN       0.64      0.66      0.65       231
+   MALIGNANT       0.44      0.43      0.44       147
+
+    accuracy                           0.57       378
+   macro avg       0.54      0.54      0.54       378
+weighted avg       0.57      0.57      0.57       378
