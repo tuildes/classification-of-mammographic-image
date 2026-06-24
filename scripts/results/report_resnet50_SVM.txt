@@ -1,0 +1,15 @@
+Results of testing: resnet50 with model: SVM
+Acurácia:       0.7037
+F1-Score:       0.6242
+Sensibilidade:  0.6327
+Especificidade: 0.7489
+
+RELATÓRIO COMPLETO (SCIKIT-LEARN):
+              precision    recall  f1-score   support
+
+      BENIGN       0.76      0.75      0.76       231
+   MALIGNANT       0.62      0.63      0.62       147
+
+    accuracy                           0.70       378
+   macro avg       0.69      0.69      0.69       378
+weighted avg       0.71      0.70      0.70       378

@@ -31,6 +31,7 @@ def main():
     data_train = ds.getPreparedDataSet(dataset_filepath, csv_target)
     data_test = ds.getPreparedDataSet(dataset_filepath, csv_test_target)
     print(data_train['pathology'].value_counts(), "\n")
+    print(data_test['pathology'].value_counts(), "\n")
 
     # Create the results folder if needed
     if not os.path.isdir(results_folder):

@@ -1,0 +1,15 @@
+Results of testing: resnet50 with model: random_forest
+Acurácia:       0.6852
+F1-Score:       0.5795
+Sensibilidade:  0.5578
+Especificidade: 0.7662
+
+RELATÓRIO COMPLETO (SCIKIT-LEARN):
+              precision    recall  f1-score   support
+
+      BENIGN       0.73      0.77      0.75       231
+   MALIGNANT       0.60      0.56      0.58       147
+
+    accuracy                           0.69       378
+   macro avg       0.67      0.66      0.66       378
+weighted avg       0.68      0.69      0.68       378
