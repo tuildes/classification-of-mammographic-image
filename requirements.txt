@@ -7,3 +7,5 @@ torchvision
 scikit-learn
 matplotlib
 seaborn
+pillow
+tqdm

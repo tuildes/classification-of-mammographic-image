@@ -14,8 +14,10 @@ import extract_resnet50 as exres
 import dataset as ds
 
 # MARK: - MAIN PROGRAM
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 def main():
-    results_folder = "./results"
+    results_folder = os.path.join(ROOT, "results")
 
     radiomics_train_csv = os.path.join(results_folder, "radiomics_features_train.csv")
     resnet_train_csv = os.path.join(results_folder, "resnet_features_train.csv")
@@ -53,7 +55,7 @@ def main():
         del df_resnet_features
         gc.collect()
     else:
-        print(f"ResNet50 training already exists - skipping training ({resnet_train_csv})")
+        print(f"ResNet50 training features already exist - skipping extraction ({resnet_train_csv})")
 
     if not os.path.isfile(resnet_test_csv):
         device = exres.setupDevice()
@@ -69,12 +71,12 @@ def main():
         del df_resnet_features
         gc.collect()
     else:
-        print(f"ResNet50 test already exists - skipping training ({resnet_train_csv})")
+        print(f"ResNet50 test features already exist - skipping extraction ({resnet_test_csv})")
 
     # MARK: - Pyradiomics analyzes
     # Only execute if the radiomics_features_train.csv doesn't exists
     if not os.path.isfile(radiomics_train_csv):
-        exrad.setupLoggin()
+        exrad.setupLogging()
         pyrad_extractor = exrad.prepareExtractor()
         pyrad_features = []
 
@@ -95,10 +97,10 @@ def main():
         del dataframe_pyrad_features
         gc.collect()
     else:
-        print(f"Radiomics training already exists - skipping training ({radiomics_train_csv})")
+        print(f"Radiomics training features already exist - skipping extraction ({radiomics_train_csv})")
 
     if not os.path.isfile(radiomics_test_csv):
-        exrad.setupLoggin()
+        exrad.setupLogging()
         pyrad_extractor = exrad.prepareExtractor()
         pyrad_features = []
 
@@ -119,7 +121,7 @@ def main():
         del dataframe_pyrad_features
         gc.collect()
     else:
-        print(f"Radiomics training already exists - skipping training ({radiomics_train_csv})")
+        print(f"Radiomics test features already exist - skipping extraction ({radiomics_test_csv})")
 
     # MARK: - Read all csv (features) and merge
     dataset_train_radiom = pd.read_csv(radiomics_train_csv)
@@ -127,15 +129,14 @@ def main():
     dataset_train_merged = pd.merge(dataset_train_radiom,
                                     dataset_train_resnet,
                                     on=['pseudo_index', 'pathology', 'target_label'])
-    dataset_train_merged.to_csv(merged_test_csv, index=False)
     dataset_test_radiom = pd.read_csv(radiomics_test_csv)
     dataset_test_resnet = pd.read_csv(resnet_test_csv)
     dataset_test_merged = pd.merge(dataset_test_radiom,
                                     dataset_test_resnet,
                                     on=['pseudo_index', 'pathology', 'target_label'])
 
-    dataset_test_merged.to_csv(merged_test_csv, index=False)
     dataset_train_merged.to_csv(merged_train_csv, index=False)
+    dataset_test_merged.to_csv(merged_test_csv, index=False)
 
     # MARK: - Prepare dataset to training/testing
     datasets = {
@@ -186,7 +187,7 @@ def main():
             sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['BENIGN', 'MALIGNANT'], yticklabels=['BENIGN', 'MALIGNANT'])
             plt.title(f'Confusion Matrix - {dataset_name} - {model_name}')
             plt.ylabel('True')
-            plt.xlabel('Prevision Model')
+            plt.xlabel('Predicted')
             plt.savefig(loc)
             plt.clf()
 

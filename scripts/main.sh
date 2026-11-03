@@ -1,5 +1,7 @@
 #!/bin/bash
+set -euo pipefail
 
-SRC_DIR="../src"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
 
-python3 "$SRC_DIR/main.py"
+python3 src/main.py

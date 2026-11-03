@@ -1,13 +1,15 @@
 #!/bin/bash
+set -euo pipefail
 
-ENV_DIR=".venv"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
 
-python3 -m venv $ENV_DIR
-source $ENV_DIR/bin/activate
-pip install --upgrade pip
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+# PyRadiomics is installed from the AIM-Harvard repository.
+python -m pip install "git+https://github.com/AIM-Harvard/pyradiomics"
 
-pip install -r requirements.txt
-pip install git+https://github.com/AIM-Harvard/pyradiomics # Solution for Pyradiomics package
-
-echo "Virtual ambient setup finished. Run the command below:"
-echo "source $ENV_DIR/bin/activate"
+echo "Ambiente pronto. Ative com:"
+echo "source .venv/bin/activate"

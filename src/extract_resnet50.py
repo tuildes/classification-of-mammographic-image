@@ -48,6 +48,9 @@ def setupDevice():
     return device
 
 def prepareModel(device):
+    # ImageNet ResNet-50 via PyTorch. Same architecture as the pretrained
+    # model published on the Hugging Face Hub (microsoft/resnet-50).
+    # The classification head is dropped so the network is only a feature extractor.
     model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
     model.fc = nn.Identity()
     model = model.to(device)

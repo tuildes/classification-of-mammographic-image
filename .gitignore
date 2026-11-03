@@ -1,6 +1,9 @@
 .DS_Store
-.venv
-
-# Ignore huge files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.kaggle/
 archive.zip
 archive/

@@ -7,7 +7,7 @@ import cv2
 
 import preprocessing as pp
 
-def setupLoggin():
+def setupLogging():
     logger = logging.getLogger("radiomics")
     logger.setLevel(logging.ERROR)
 
