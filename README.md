@@ -1,98 +1,108 @@
-# Classificador de mamografias
+<p align="center">
+  <h1 align="center">Mammography Classifier</h1>
+</p>
 
-Pipeline de machine learning em Python para classificar massas mamográficas em **benigno** ou **maligno**. O estudo compara seis modelos: SVM e Random Forest treinados sobre características radiômicas, características profundas de uma ResNet-50 e a fusão das duas, no split oficial de treino e teste do CBIS-DDSM.
+<p align="center">
+  <i>A Python machine learning pipeline that classifies mammographic masses as benign or malignant, comparing radiomics, a pretrained ResNet-50, and their fusion.</i>
+</p>
 
-**Python · PyTorch · scikit-learn · Hugging Face · OpenCV**
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-Python-blue" alt="Python">
+  <img src="https://img.shields.io/badge/PyTorch-red" alt="PyTorch">
+  <img src="https://img.shields.io/badge/scikit--learn-orange" alt="scikit-learn">
+  <img src="https://img.shields.io/badge/Hugging%20Face-yellow" alt="Hugging Face">
+  <img src="https://img.shields.io/badge/OpenCV-green" alt="OpenCV">
+</p>
 
-No teste (378 imagens), a SVM treinada na fusão chegou a **70,9% de acurácia**. As radiômicas isoladas ficaram em torno de **59%**.
+On the official test split (378 images), the SVM trained on the fused features reached **70.9% accuracy**. Radiomics alone stayed around **59%**.
 
-O relatório escrito do trabalho está em [`docs/artigo.pdf`](docs/artigo.pdf).
+The written report is in Brazilian Portuguese: [`docs/artigo.pdf`](docs/artigo.pdf).
 
-## Pipeline
+## 1. Pipeline
 
 ```text
-CBIS-DDSM (massas, split oficial)
+CBIS-DDSM (masses, official split)
         │
         ▼
-OpenCV: filtro bilateral + CLAHE
+OpenCV: bilateral filter + CLAHE
         │
         ├──────────────────────────────┐
         ▼                              ▼
 PyRadiomics                      ResNet-50 (PyTorch)
-93 características               2048 características
-na máscara da lesão              na ROI recortada
+93 features                      2048 features
+inside the lesion mask           on the cropped ROI
         │                              │
         └──────────┬───────────────────┘
                    ▼
-        três representações
-        radiômicas · ResNet-50 · fusão
+        three representations
+        radiomics · ResNet-50 · fusion
                    │
                    ▼
-        StandardScaler + SVM (RBF) e Random Forest
+        StandardScaler + SVM (RBF) and Random Forest
                    │
                    ▼
-        teste: acurácia, F1, sensibilidade,
-        especificidade e matriz de confusão
+        test: accuracy, F1, sensitivity,
+        specificity, and confusion matrix
 ```
 
-1. O dataset CBIS-DDSM é baixado com `kagglehub` e os caminhos do CSV oficial de massas são resolvidos para os JPEGs locais.
-2. Cada imagem passa por filtro bilateral e CLAHE (OpenCV).
-3. PyRadiomics descreve a lesão dentro da máscara. A ResNet-50 pré-treinada, carregada com PyTorch, descreve a ROI recortada. A rede não é retreinada: a cabeça de classificação sai e o embedding de 2048 dimensões entra como feature.
-4. SVM e Random Forest (scikit-learn) são treinados em cada representação e na fusão, só com o conjunto de treino.
-5. Os seis modelos são avaliados no conjunto de teste.
+1. CBIS-DDSM is downloaded with `kagglehub`, and the official mass CSV paths are resolved to the local JPEGs.
+2. Every image goes through a bilateral filter and CLAHE (OpenCV).
+3. PyRadiomics describes the lesion inside the mask. A pretrained ResNet-50, loaded with PyTorch, describes the cropped ROI. The network is kept frozen: the classification head is removed and the 2048-dimensional embedding is the feature vector.
+4. SVM and Random Forest (scikit-learn) are trained on each representation and on the fusion, using the training split only.
+5. All six models are evaluated on the test split.
 
-`BENIGN` e `BENIGN_WITHOUT_CALLBACK` formam a classe 0. `MALIGNANT` é a classe 1, a classe positiva da sensibilidade e do F1.
+`BENIGN` and `BENIGN_WITHOUT_CALLBACK` are class 0. `MALIGNANT` is class 1, the positive class for sensitivity and F1.
 
-## O que entra em cada modelo
+## 2. What each model receives
 
-| Representação | Origem | Características usadas no classificador |
-| --- | --- | --- |
-| Radiômicas | PyRadiomics na mamografia completa + máscara | 93 |
-| ResNet-50 | ROI recortada, extrator pré-treinado | 2048 |
-| Fusão | junção das duas pelo identificador da lesão | 2141 |
+| Representation | Source | Features used by the classifier |
+| --- | --- | ---: |
+| Radiomics | PyRadiomics on the full mammogram plus the mask | 93 |
+| ResNet-50 | Cropped ROI, pretrained extractor | 2048 |
+| Fusion | Both vectors joined by lesion id | 2141 |
 
-As 93 radiômicas são as famílias padrão do PyRadiomics: first-order (18), GLCM (24), GLRLM (16), GLSZM (16), GLDM (14) e NGTDM (5). O extrator usa `binWidth` 25, normalização, interpolação B-spline e `force2D`.
+The 93 radiomic features are the default PyRadiomics families: first-order (18), GLCM (24), GLRLM (16), GLSZM (16), GLDM (14), and NGTDM (5). The extractor uses `binWidth` 25, normalization, B-spline interpolation, and `force2D`.
 
-A ResNet-50 é a rede pré-treinada no ImageNet exposta pelo PyTorch (`torchvision.models.resnet50`, `ResNet50_Weights.DEFAULT`). A mesma arquitetura está publicada no Hugging Face Hub como [`microsoft/resnet-50`](https://huggingface.co/microsoft/resnet-50). Neste repositório o modelo é carregado com PyTorch e usado só como extrator de features: `fc` vira `nn.Identity()`. A ROI é convertida para RGB, redimensionada para 240×240 e normalizada com a média e o desvio do ImageNet. O artigo cita 224×224 nessa etapa; o valor executado pelo código está em `src/extract_resnet50.py`.
+ResNet-50 is the ImageNet-pretrained network exposed by PyTorch (`torchvision.models.resnet50`, `ResNet50_Weights.DEFAULT`). The same architecture is published on the Hugging Face Hub as [`microsoft/resnet-50`](https://huggingface.co/microsoft/resnet-50). This repository loads the model with PyTorch and uses it only as a feature extractor: `fc` becomes `nn.Identity()`. The ROI is converted to RGB, resized to 240×240, and normalized with the ImageNet mean and standard deviation. The article describes this resize as 224×224; the value the code runs is in `src/extract_resnet50.py`.
 
-Os classificadores, ambos com `random_state=42`:
+Both classifiers use `random_state=42`:
 
-- SVM com kernel RBF, `C=2.0` e `gamma='scale'`
-- Random Forest com 100 árvores
+- SVM with an RBF kernel, `C=2.0`, and `gamma='scale'`
+- Random Forest with 100 trees
 
-As features passam por `StandardScaler` ajustado no treino. O teste só transforma.
+Features go through a `StandardScaler` fit on the training split. The test split is only transformed.
 
-## Dados
+## 3. Data
 
-Fonte: [CBIS-DDSM no Kaggle](https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset) (`awsaf49/cbis-ddsm-breast-cancer-image-dataset`).
+Source: [CBIS-DDSM on Kaggle](https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset) (`awsaf49/cbis-ddsm-breast-cancer-image-dataset`).
 
-O pipeline usa o split oficial de **massas** (`mass_case_description_train_set.csv` e `mass_case_description_test_set.csv`). Calcificações ficam de fora.
+The pipeline uses the official **mass** split (`mass_case_description_train_set.csv` and `mass_case_description_test_set.csv`). Calcifications are left out.
 
-| Conjunto | Imagens | Benigno (classe 0) | Maligno (classe 1) |
+| Split | Images | Benign (class 0) | Malignant (class 1) |
 | --- | ---: | ---: | ---: |
-| Treino | 1318 | 681 | 637 |
-| Teste | 378 | 231 | 147 |
+| Train | 1318 | 681 | 637 |
+| Test | 378 | 231 | 147 |
 
-O benigno de treino reúne 577 `BENIGN` e 104 `BENIGN_WITHOUT_CALLBACK`. No teste são 194 e 37.
+Training benign cases are 577 `BENIGN` and 104 `BENIGN_WITHOUT_CALLBACK`. The test split has 194 and 37.
 
-## Resultados no teste
+## 4. Test results
 
-Métricas do pipeline final (filtro bilateral + CLAHE). Sensibilidade é o recall da classe maligna. Especificidade é o recall da classe benigna.
+Metrics for the final pipeline (bilateral filter + CLAHE). Sensitivity is the recall of the malignant class. Specificity is the recall of the benign class.
 
-| Características | Modelo | Acurácia | F1 | Sensibilidade | Especificidade |
+| Features | Model | Accuracy | F1 | Sensitivity | Specificity |
 | --- | --- | ---: | ---: | ---: | ---: |
-| Fusão | SVM | **0,7090** | **0,6259** | 0,6259 | 0,7619 |
-| ResNet-50 | SVM | 0,7037 | 0,6242 | 0,6327 | 0,7489 |
-| Fusão | Random Forest | 0,6852 | 0,5966 | 0,5986 | 0,7403 |
-| ResNet-50 | Random Forest | 0,6852 | 0,5795 | 0,5578 | 0,7662 |
-| Radiômicas | SVM | 0,5952 | 0,4632 | 0,4490 | 0,6883 |
-| Radiômicas | Random Forest | 0,5873 | 0,4834 | 0,4966 | 0,6450 |
+| Fusion | SVM | **0.7090** | **0.6259** | 0.6259 | 0.7619 |
+| ResNet-50 | SVM | 0.7037 | 0.6242 | 0.6327 | 0.7489 |
+| Fusion | Random Forest | 0.6852 | 0.5966 | 0.5986 | 0.7403 |
+| ResNet-50 | Random Forest | 0.6852 | 0.5795 | 0.5578 | 0.7662 |
+| Radiomics | SVM | 0.5952 | 0.4632 | 0.4490 | 0.6883 |
+| Radiomics | Random Forest | 0.5873 | 0.4834 | 0.4966 | 0.6450 |
 
-A fusão melhora pouco a ResNet-50 sozinha: a acurácia da SVM sobe de 0,7037 para 0,7090 e a especificidade de 0,7489 para 0,7619, com uma queda pequena de sensibilidade (0,6327 para 0,6259). Radiômicas isoladas ficam perto de 0,59.
+Fusion improves ResNet-50 alone by a small margin: SVM accuracy goes from 0.7037 to 0.7090 and specificity from 0.7489 to 0.7619, with a small drop in sensitivity (0.6327 to 0.6259). Radiomics alone stays near 0.59.
 
-### Exemplo: relatório da SVM na fusão
+### 4.1. Example: fused SVM report
 
-Arquivo [`results/report_merged_SVM.txt`](results/report_merged_SVM.txt):
+File [`results/report_merged_SVM.txt`](results/report_merged_SVM.txt). The saved report keeps its original Portuguese labels.
 
 ```text
 Results of testing: merged with model: SVM
@@ -109,48 +119,48 @@ Especificidade: 0.7619
     accuracy                           0.71       378
 ```
 
-A matriz correspondente está em [`results/confusion_matrix_merged_SVM.png`](results/confusion_matrix_merged_SVM.png).
+The matching matrix is [`results/confusion_matrix_merged_SVM.png`](results/confusion_matrix_merged_SVM.png).
 
-![Matriz de confusão da SVM treinada na fusão de radiômicas e ResNet-50](results/confusion_matrix_merged_SVM.png)
+![Confusion matrix of the SVM trained on fused radiomics and ResNet-50 features](results/confusion_matrix_merged_SVM.png)
 
-Leitura dessa matriz, no conjunto de teste:
+Reading that matrix on the test split:
 
-|  | Predito benigno | Predito maligno |
+|  | Predicted benign | Predicted malignant |
 | --- | ---: | ---: |
-| Benigno | 176 | 55 |
-| Maligno | 55 | 92 |
+| Benign | 176 | 55 |
+| Malignant | 55 | 92 |
 
-176 + 92 acertos em 378 casos dão a acurácia 0,7090. Os 92 malignos encontrados em 147 dão a sensibilidade 0,6259. Os 176 benignos encontrados em 231 dão a especificidade 0,7619.
+176 + 92 correct predictions out of 378 give an accuracy of 0.7090. The 92 malignant cases found out of 147 give a sensitivity of 0.6259. The 176 benign cases found out of 231 give a specificity of 0.7619.
 
-Os seis relatórios e as seis matrizes da execução final estão em [`results/`](results/).
+The six reports and six matrices from the final run are in [`results/`](results/).
 
-## Pré-processamentos comparados
+## 5. Preprocessing comparison
 
-O pré-processamento escolhido para o resultado final é filtro bilateral (`d=9`, `sigmaColor=75`, `sigmaSpace=75`) seguido de CLAHE (`clipLimit=2.0`, grade 8×8), em [`src/preprocessing.py`](src/preprocessing.py).
+The preprocessing kept for the final result is a bilateral filter (`d=9`, `sigmaColor=75`, `sigmaSpace=75`) followed by CLAHE (`clipLimit=2.0`, 8×8 grid), in [`src/preprocessing.py`](src/preprocessing.py).
 
-Outras variantes ficam em [`results/ablation/`](results/ablation/). Abaixo, a acurácia da SVM na fusão, que foi o critério do resultado principal:
+The other variants are in [`results/ablation/`](results/ablation/). The table below is the fused-SVM accuracy, which was the criterion for the main result:
 
-| Pré-processamento | Pasta | Acurácia da SVM na fusão |
+| Preprocessing | Folder | Fused SVM accuracy |
 | --- | --- | ---: |
-| Bilateral + CLAHE (final) | `results/` | **0,7090** |
-| Equalização de histograma | `results/ablation/histogram_equalization/` | 0,6852 |
-| Sem pré-processamento | `results/ablation/no_preprocessing/` | 0,6825 |
-| CLAHE | `results/ablation/clahe/` | 0,6799 |
-| Mediana | `results/ablation/median/` | 0,6772 |
-| Unsharp | `results/ablation/unsharp/` | 0,6667 |
-| Bilateral | `results/ablation/bilateral/` | 0,6640 |
+| Bilateral + CLAHE (final) | `results/` | **0.7090** |
+| Histogram equalization | `results/ablation/histogram_equalization/` | 0.6852 |
+| No preprocessing | `results/ablation/no_preprocessing/` | 0.6825 |
+| CLAHE | `results/ablation/clahe/` | 0.6799 |
+| Median | `results/ablation/median/` | 0.6772 |
+| Unsharp | `results/ablation/unsharp/` | 0.6667 |
+| Bilateral | `results/ablation/bilateral/` | 0.6640 |
 
-Nas pastas de ablação, as métricas da ResNet-50 se repetem (SVM com acurácia 0,6958). A execução final, em `results/`, reextraiu a ResNet-50 com bilateral + CLAHE e chegou a 0,7037.
+Inside the ablation folders, the ResNet-50 metrics are repeated (SVM accuracy 0.6958). The final run, in `results/`, extracted ResNet-50 again with bilateral + CLAHE and reached 0.7037.
 
-## Artigo
+## 6. Article
 
-[`docs/artigo.pdf`](docs/artigo.pdf) — *Classificação de Imagens de Tecido de Mama*, de Aurélio Gabriel Ortiz Vieira e Gustavo Benitez Frehse (UFPR).
+[`docs/artigo.pdf`](docs/artigo.pdf) is written in Brazilian Portuguese. The title is *Classificação de Imagens de Tecido de Mama* (*Classification of Breast Tissue Images*), by Aurélio Gabriel Ortiz Vieira and Gustavo Benitez Frehse (UFPR).
 
-O texto descreve este pipeline: preparação do CBIS-DDSM, radiômica com PyRadiomics, ResNet-50 como extratora, SVM, Random Forest e a comparação dos seis modelos no teste. Os números da discussão (SVM na fusão com acurácia 0,7090 e F1 0,6259) são os desta pasta `results/`.
+The text describes this pipeline: CBIS-DDSM preparation, PyRadiomics features, ResNet-50 as an extractor, SVM, Random Forest, and the comparison of the six models on the test split. The figures discussed there (fused SVM accuracy 0.7090 and F1 0.6259) are the ones in `results/`.
 
-## Como executar
+## 7. How to run
 
-O ambiente precisa de Python 3, credencial da API do Kaggle (`~/.kaggle/kaggle.json`) e espaço para o CBIS-DDSM. A primeira execução baixa o dataset e extrai as features. PyRadiomics no conjunto inteiro é a etapa lenta. Se os CSV de features já existirem em `results/`, a extração é pulada.
+The environment needs Python 3, a Kaggle API credential (`~/.kaggle/kaggle.json`), and disk space for CBIS-DDSM. The first run downloads the dataset and extracts the features. PyRadiomics over the full set is the slow step. If the feature CSVs already exist in `results/`, extraction is skipped.
 
 ```bash
 bash scripts/setup.sh
@@ -158,9 +168,9 @@ source .venv/bin/activate
 python src/main.py
 ```
 
-`scripts/main.sh` faz o mesmo `python src/main.py` a partir da raiz do repositório. Rodar o script de novo regrava os relatórios e as matrizes em `results/`. Com os CSV atuais e `random_state=42`, as métricas da tabela principal se repetem.
+`scripts/main.sh` runs the same `python src/main.py` from the repository root. Running it again rewrites the reports and matrices in `results/`. With the current CSVs and `random_state=42`, the metrics in the main table come out the same.
 
-Saídas da execução final:
+Outputs of the final run:
 
 ```text
 results/radiomics_features_{train,test}.csv
@@ -170,22 +180,22 @@ results/report_{radiomics,resnet50,merged}_{SVM,random_forest}.txt
 results/confusion_matrix_{radiomics,resnet50,merged}_{SVM,random_forest}.png
 ```
 
-## Estrutura
+## 8. Layout
 
 ```text
-src/dataset.py              download e split oficial de massas do CBIS-DDSM
-src/preprocessing.py        filtro bilateral + CLAHE
+src/dataset.py              CBIS-DDSM download and official mass split
+src/preprocessing.py        bilateral filter + CLAHE
 src/extract_radiomics.py    PyRadiomics
-src/extract_resnet50.py     ResNet-50 (PyTorch) como extratora
-src/main.py                 fusão, treino e métricas dos seis modelos
-scripts/setup.sh            ambiente virtual e dependências
-scripts/main.sh             atalho para src/main.py
+src/extract_resnet50.py     ResNet-50 (PyTorch) feature extractor
+src/main.py                 fusion, training, and metrics for the six models
+scripts/setup.sh            virtual environment and dependencies
+scripts/main.sh             shortcut for src/main.py
 requirements.txt
-results/                    métricas e features da execução final
-results/ablation/           variantes de pré-processamento
-docs/artigo.pdf             relatório escrito
+results/                    metrics and features from the final run
+results/ablation/           preprocessing variants
+docs/artigo.pdf             written report (Brazilian Portuguese)
 ```
 
-## Limitações
+## 9. Limitations
 
-O teste tem 231 benignos e 147 malignos, e o treino tem 1318 imagens. A especificidade fica acima da sensibilidade em todos os seis modelos: o melhor ainda deixa 55 das 147 lesões malignas como benignas. O ganho da fusão sobre a ResNet-50 sozinha é pequeno. Estes números servem para comparar representações e classificadores neste split. O estudo não é um sistema de laudo.
+The test split has 231 benign and 147 malignant cases, and the training split has 1318 images. Specificity stays above sensitivity for all six models: the best one still calls 55 of the 147 malignant lesions benign. The gain of fusion over ResNet-50 alone is small. These numbers compare representations and classifiers on this split. The study is a model-evaluation project, and it is not a diagnostic system.
